@@ -160,7 +160,9 @@ class PledgeTests {
     fun `Cancel pledge tests`() {
         val defaultPledge = Pledge(100.POUNDS, B, A, newValidCampaign.linearId)
 
-        val endedCampaign = newValidCampaign.copy(deadline = Instant.now().minusSeconds(1))
+        val endedCampaign = newValidCampaign.copy(
+                deadline = Instant.now().minusSeconds(1),
+                raisedSoFar = 100.POUNDS)
 
         ledger {
             // Valid make pledge transaction.
