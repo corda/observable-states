@@ -106,7 +106,7 @@ class CampaignContract : Contract {
         // Check to see how many pledges we received.
         val zero = Amount.zero(campaignInput.target.token)
         val sumOfAllPledges = pledgeInputs.map { (amount) -> amount }.fold(zero) { acc, curr -> acc + curr }
-        "There is a mismatch between input pledge states and Campaign.raiseSoFar" using
+        "There is a mismatch between input pledge states and Campaign.raisedSoFar" using
                 (campaignInput.raisedSoFar == sumOfAllPledges)
 
         // do different stuff depending on how many pledges we get.
