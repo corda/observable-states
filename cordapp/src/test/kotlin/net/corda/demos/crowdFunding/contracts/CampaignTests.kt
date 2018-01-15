@@ -391,7 +391,9 @@ class CampaignTests {
 
     @Test
     fun `End campaign in success`() {
-        val endedCampaign = newValidCampaign.copy(deadline = Instant.now().minusSeconds(1))
+        val endedCampaign = newValidCampaign.copy(
+                deadline = Instant.now().minusSeconds(1),
+                raisedSoFar = 1000.POUNDS)
 
         ledger {
             transaction {
