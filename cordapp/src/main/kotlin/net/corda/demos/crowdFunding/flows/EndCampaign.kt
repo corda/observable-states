@@ -15,7 +15,6 @@ import net.corda.demos.crowdFunding.pledgersForCampaign
 import net.corda.demos.crowdFunding.structures.Campaign
 import net.corda.demos.crowdFunding.structures.CampaignResult
 import net.corda.demos.crowdFunding.structures.CashStatesPayload
-import net.corda.finance.contracts.asset.CASH_PROGRAM_ID
 import net.corda.finance.contracts.asset.Cash
 
 /**
@@ -90,7 +89,7 @@ object EndCampaign {
 
             // Add the cash inputs, outputs and command.
             cashStates.inputs.forEach { utx.addInputState(it) }
-            cashStates.outputs.forEach { utx.addOutputState(it, CASH_PROGRAM_ID) }
+            cashStates.outputs.forEach { utx.addOutputState(it, Cash.PROGRAM_ID) }
             utx.addCommand(Cash.Commands.Move(), cashStates.signingKeys)
 
             return utx

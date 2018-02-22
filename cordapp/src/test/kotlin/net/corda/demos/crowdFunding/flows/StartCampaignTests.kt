@@ -3,29 +3,12 @@ package net.corda.demos.crowdFunding.flows
 import net.corda.core.utilities.getOrThrow
 import net.corda.demos.crowdFunding.structures.Campaign
 import net.corda.finance.POUNDS
-import net.corda.node.internal.StartedNode
-import net.corda.testing.node.MockNetwork
+import net.corda.testing.node.StartedMockNode
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class StartCampaignTests : CrowdFundingTest(numberOfNodes = 5) {
-
-    lateinit var A: StartedNode<MockNetwork.MockNode>
-    lateinit var B: StartedNode<MockNetwork.MockNode>
-    lateinit var C: StartedNode<MockNetwork.MockNode>
-    lateinit var D: StartedNode<MockNetwork.MockNode>
-    lateinit var E: StartedNode<MockNetwork.MockNode>
-
-    @Before
-    override fun initialiseNodes() {
-        A = nodes[0]
-        B = nodes[1]
-        C = nodes[2]
-        D = nodes[3]
-        E = nodes[4]
-    }
-
+class StartCampaignTests : CrowdFundingTest() {
     private val rogersCampaign
         get() = Campaign(
             name = "Roger's Campaign",
@@ -45,11 +28,11 @@ class StartCampaignTests : CrowdFundingTest(numberOfNodes = 5) {
         val campaignState = campaign.tx.outputs.single()
 
         // Get the Campaign state from the observer node vaults.
-        val aCampaign = A.database.transaction { A.services.loadState(campaignStateRef) }
-        val bCampaign = B.database.transaction { B.services.loadState(campaignStateRef) }
-        val cCampaign = C.database.transaction { C.services.loadState(campaignStateRef) }
-        val dCampaign = D.database.transaction { D.services.loadState(campaignStateRef) }
-        val eCampaign = E.database.transaction { E.services.loadState(campaignStateRef) }
+        val aCampaign = A.services.database.transaction { A.services.loadState(campaignStateRef) }
+        val bCampaign = B.services.database.transaction { B.services.loadState(campaignStateRef) }
+        val cCampaign = C.services.database.transaction { C.services.loadState(campaignStateRef) }
+        val dCampaign = D.services.database.transaction { D.services.loadState(campaignStateRef) }
+        val eCampaign = E.services.database.transaction { E.services.loadState(campaignStateRef) }
 
         // All the states should be equal.
         assertEquals(1, setOf(campaignState, aCampaign, bCampaign, cCampaign, dCampaign, eCampaign).size)

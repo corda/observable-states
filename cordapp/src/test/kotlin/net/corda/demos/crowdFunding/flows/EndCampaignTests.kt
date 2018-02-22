@@ -9,30 +9,12 @@ import net.corda.demos.crowdFunding.structures.Pledge
 import net.corda.finance.GBP
 import net.corda.finance.POUNDS
 import net.corda.finance.contracts.getCashBalance
-import net.corda.node.internal.StartedNode
-import net.corda.testing.node.MockNetwork
-import org.junit.Before
+import net.corda.testing.node.StartedMockNode
 import org.junit.Test
 import kotlin.test.assertEquals
 
 // TODO: Refactor repeated tests.
-class EndCampaignTests : CrowdFundingTest(numberOfNodes = 5) {
-
-    lateinit var A: StartedNode<MockNetwork.MockNode>
-    lateinit var B: StartedNode<MockNetwork.MockNode>
-    lateinit var C: StartedNode<MockNetwork.MockNode>
-    lateinit var D: StartedNode<MockNetwork.MockNode>
-    lateinit var E: StartedNode<MockNetwork.MockNode>
-
-    @Before
-    override fun initialiseNodes() {
-        A = nodes[0]
-        B = nodes[1]
-        C = nodes[2]
-        D = nodes[3]
-        E = nodes[4]
-    }
-
+class EndCampaignTests : CrowdFundingTest() {
     private val rogersCampaign
         get() = Campaign(
                 name = "Roger's Campaign",
@@ -41,13 +23,9 @@ class EndCampaignTests : CrowdFundingTest(numberOfNodes = 5) {
                 deadline = fiveSecondsFromNow
         )
 
-    private fun checkUpdatesAreCommitted(
-            party: StartedNode<MockNetwork.MockNode>,
-            campaignId: UniqueIdentifier,
-            campaignState: Campaign
-    ) {
+    private fun checkUpdatesAreCommitted(party: StartedMockNode, campaignId: UniqueIdentifier, campaignState: Campaign) {
         // Check that the EndCampaign transaction is committed by B and the Pledge/Campaign states are consumed.
-        party.database.transaction {
+        party.services.database.transaction {
             val (_, observable) = party.services.validatedTransactions.track()
             observable.first { it.tx.outputStates.isEmpty() }.subscribe { logger.info(it.tx.toString()) }
 
@@ -71,7 +49,7 @@ class EndCampaignTests : CrowdFundingTest(numberOfNodes = 5) {
         val campaignStateAfterFirstPledge = campaignAfterFirstPledge.tx.outputsOfType<Campaign>().single()
 
         // Wait for the campaign to end...
-        net.waitQuiescent()
+        network.waitQuiescent()
 
         checkUpdatesAreCommitted(A, newCampaignId, campaignStateAfterFirstPledge)
         checkUpdatesAreCommitted(B, newCampaignId, campaignStateAfterFirstPledge)
@@ -122,7 +100,7 @@ class EndCampaignTests : CrowdFundingTest(numberOfNodes = 5) {
         logger.info(campaignAfterSecondPledge.tx.toString())
 
         logger.info("PartyA runs the EndCampaign flow and requests cash from the pledgers (PartyB and PartyC).")
-        A.database.transaction {
+        A.services.database.transaction {
             val (_, observable) = A.services.validatedTransactions.track()
             observable.subscribe { tx ->
                 // Don't log dependency transactions.
@@ -133,25 +111,25 @@ class EndCampaignTests : CrowdFundingTest(numberOfNodes = 5) {
             }
         }
 
-        net.waitQuiescent()
+        network.waitQuiescent()
 
         // Now perform the tests to check everyone has the correct data.
 
         // See that everyone gets the new campaign.
-        val aNewCampaign = A.database.transaction { A.services.loadState(newCampaignStateRef).data }
-        val bNewCampaign = B.database.transaction { B.services.loadState(newCampaignStateRef).data }
-        val cNewCampaign = C.database.transaction { C.services.loadState(newCampaignStateRef).data }
-        val dNewCampaign = D.database.transaction { D.services.loadState(newCampaignStateRef).data }
-        val eNewCampaign = E.database.transaction { E.services.loadState(newCampaignStateRef).data }
+        val aNewCampaign = A.services.database.transaction { A.services.loadState(newCampaignStateRef).data }
+        val bNewCampaign = B.services.database.transaction { B.services.loadState(newCampaignStateRef).data }
+        val cNewCampaign = C.services.database.transaction { C.services.loadState(newCampaignStateRef).data }
+        val dNewCampaign = D.services.database.transaction { D.services.loadState(newCampaignStateRef).data }
+        val eNewCampaign = E.services.database.transaction { E.services.loadState(newCampaignStateRef).data }
 
         assertEquals(1, setOf(newCampaignState, aNewCampaign, bNewCampaign, cNewCampaign, dNewCampaign, eNewCampaign).size)
 
         // See that everyone gets the updated campaign after the first pledge.
-        val aCampaignAfterPledge = A.database.transaction { A.services.loadState(campaignStateRefAfterFirstPledge).data }
-        val bCampaignAfterPledge = B.database.transaction { B.services.loadState(campaignStateRefAfterFirstPledge).data }
-        val cCampaignAfterPledge = C.database.transaction { C.services.loadState(campaignStateRefAfterFirstPledge).data }
-        val dCampaignAfterPledge = D.database.transaction { D.services.loadState(campaignStateRefAfterFirstPledge).data }
-        val eCampaignAfterPledge = E.database.transaction { E.services.loadState(campaignStateRefAfterFirstPledge).data }
+        val aCampaignAfterPledge = A.services.database.transaction { A.services.loadState(campaignStateRefAfterFirstPledge).data }
+        val bCampaignAfterPledge = B.services.database.transaction { B.services.loadState(campaignStateRefAfterFirstPledge).data }
+        val cCampaignAfterPledge = C.services.database.transaction { C.services.loadState(campaignStateRefAfterFirstPledge).data }
+        val dCampaignAfterPledge = D.services.database.transaction { D.services.loadState(campaignStateRefAfterFirstPledge).data }
+        val eCampaignAfterPledge = E.services.database.transaction { E.services.loadState(campaignStateRefAfterFirstPledge).data }
 
         // All parties should have the same updated Campaign state.
         assertEquals(1, setOf(campaignStateAfterFirstPledge, aCampaignAfterPledge, bCampaignAfterPledge, cCampaignAfterPledge, dCampaignAfterPledge, eCampaignAfterPledge).size)
@@ -159,36 +137,36 @@ class EndCampaignTests : CrowdFundingTest(numberOfNodes = 5) {
         // See that confidentiality is maintained.
         assertEquals(B.legalIdentity(), A.services.identityService.wellKnownPartyFromAnonymous(firstPledge.pledger))
         assertEquals(B.legalIdentity(), B.services.identityService.wellKnownPartyFromAnonymous(firstPledge.pledger))
-        assertEquals(null, C.database.transaction { C.services.identityService.wellKnownPartyFromAnonymous(firstPledge.pledger) })
-        assertEquals(null, D.database.transaction { D.services.identityService.wellKnownPartyFromAnonymous(firstPledge.pledger) })
-        assertEquals(null, E.database.transaction { E.services.identityService.wellKnownPartyFromAnonymous(firstPledge.pledger) })
+        assertEquals(null, C.services.database.transaction { C.services.identityService.wellKnownPartyFromAnonymous(firstPledge.pledger) })
+        assertEquals(null, D.services.database.transaction { D.services.identityService.wellKnownPartyFromAnonymous(firstPledge.pledger) })
+        assertEquals(null, E.services.database.transaction { E.services.identityService.wellKnownPartyFromAnonymous(firstPledge.pledger) })
 
         // See that everyone gets the updated campaign after the second pledge.
-        val aCampaignAfterSecondPledge = A.database.transaction { A.services.loadState(campaignStateRefAfterSecondPledge).data }
-        val bCampaignAfterSecondPledge = B.database.transaction { B.services.loadState(campaignStateRefAfterSecondPledge).data }
-        val cCampaignAfterSecondPledge = C.database.transaction { C.services.loadState(campaignStateRefAfterSecondPledge).data }
-        val dCampaignAfterSecondPledge = D.database.transaction { D.services.loadState(campaignStateRefAfterSecondPledge).data }
-        val eCampaignAfterSecondPledge = E.database.transaction { E.services.loadState(campaignStateRefAfterSecondPledge).data }
+        val aCampaignAfterSecondPledge = A.services.database.transaction { A.services.loadState(campaignStateRefAfterSecondPledge).data }
+        val bCampaignAfterSecondPledge = B.services.database.transaction { B.services.loadState(campaignStateRefAfterSecondPledge).data }
+        val cCampaignAfterSecondPledge = C.services.database.transaction { C.services.loadState(campaignStateRefAfterSecondPledge).data }
+        val dCampaignAfterSecondPledge = D.services.database.transaction { D.services.loadState(campaignStateRefAfterSecondPledge).data }
+        val eCampaignAfterSecondPledge = E.services.database.transaction { E.services.loadState(campaignStateRefAfterSecondPledge).data }
 
         // All parties should have the same updated Campaign state.
         assertEquals(1, setOf(campaignStateAfterSecondPledge, aCampaignAfterSecondPledge, bCampaignAfterSecondPledge, cCampaignAfterSecondPledge, dCampaignAfterSecondPledge, eCampaignAfterSecondPledge).size)
 
         // See that confidentiality is maintained.
         assertEquals(C.legalIdentity(), A.services.identityService.wellKnownPartyFromAnonymous(secondPledge.pledger))
-        assertEquals(null, B.database.transaction { B.services.identityService.wellKnownPartyFromAnonymous(secondPledge.pledger) })
+        assertEquals(null, B.services.database.transaction { B.services.identityService.wellKnownPartyFromAnonymous(secondPledge.pledger) })
         assertEquals(C.legalIdentity(), C.services.identityService.wellKnownPartyFromAnonymous(secondPledge.pledger))
-        assertEquals(null, D.database.transaction { D.services.identityService.wellKnownPartyFromAnonymous(secondPledge.pledger) })
-        assertEquals(null, E.database.transaction { E.services.identityService.wellKnownPartyFromAnonymous(secondPledge.pledger) })
+        assertEquals(null, D.services.database.transaction { D.services.identityService.wellKnownPartyFromAnonymous(secondPledge.pledger) })
+        assertEquals(null, E.services.database.transaction { E.services.identityService.wellKnownPartyFromAnonymous(secondPledge.pledger) })
 
         // WARNING: The nodes which were not involved in the pledging or the campaign get to see the transferred cash in their vaults!!!!!!!!
         // This is not a bug but a consequence of storing ALL output states in a transaction.
         // We need to change this such that a filtered transaction can be recorded instead of a full SignedTransaction.
         // The other option is not to broadcast the pledge transactions.
-        A.database.transaction { logger.info(A.services.getCashBalance(GBP).toString()) }
-        B.database.transaction { logger.info(B.services.getCashBalance(GBP).toString()) }
-        C.database.transaction { logger.info(C.services.getCashBalance(GBP).toString()) }
-        D.database.transaction { logger.info(D.services.getCashBalance(GBP).toString()) }
-        E.database.transaction { logger.info(E.services.getCashBalance(GBP).toString()) }
+        A.services.database.transaction { logger.info(A.services.getCashBalance(GBP).toString()) }
+        B.services.database.transaction { logger.info(B.services.getCashBalance(GBP).toString()) }
+        C.services.database.transaction { logger.info(C.services.getCashBalance(GBP).toString()) }
+        D.services.database.transaction { logger.info(D.services.getCashBalance(GBP).toString()) }
+        E.services.database.transaction { logger.info(E.services.getCashBalance(GBP).toString()) }
     }
 
 }
