@@ -20,10 +20,10 @@ import java.time.Instant
 class CampaignTests {
     private val ledgerServices = MockServices(listOf("net.corda.testing.contracts", "net.corda.demos.crowdFunding", "net.corda.finance"))
     private val issuer = TestIdentity(CordaX500Name("Issuer", "", "GB"))
-    private val A = TestIdentity(CordaX500Name("A", "", "GB"))
-    private val B = TestIdentity(CordaX500Name("B", "", "GB"))
-    private val C = TestIdentity(CordaX500Name("C", "", "GB"))
-    private val D = TestIdentity(CordaX500Name("D", "", "GB"))
+    private val A = TestIdentity(CordaX500Name("Alice", "", "GB"))
+    private val B = TestIdentity(CordaX500Name("Bob", "", "GB"))
+    private val C = TestIdentity(CordaX500Name("Carl", "", "GB"))
+    private val D = TestIdentity(CordaX500Name("Demi", "", "GB"))
 
     val defaultIssuer = issuer.ref(Byte.MIN_VALUE)
     private fun partyKeys(vararg identities: TestIdentity) = identities.map { it.party.owningKey }

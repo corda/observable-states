@@ -28,21 +28,37 @@ data class Pledge(
     object PledgeSchemaV1 : MappedSchema(Pledge::class.java, 1, listOf(PledgeEntity::class.java)) {
         @Entity
         @Table(name = "pledges")
-        class PledgeEntity(pledge: Pledge) : PersistentState() {
-            @Column
-            var currency: String = pledge.amount.token.toString()
-            @Column
-            var amount: Long = pledge.amount.quantity
-            @Column
-            @Lob
-            var pledger: ByteArray = pledge.pledger.owningKey.encoded
-            @Column
-            @Lob
-            var manager: ByteArray = pledge.manager.owningKey.encoded
-            @Column
-            var campaign_reference: String = pledge.campaignReference.id.toString()
-            @Column
-            var linear_id: String = pledge.linearId.id.toString()
+        class PledgeEntity(
+                @Column
+                var currency: String,
+
+                @Column
+                var amount: Long,
+
+                @Column
+                @Lob
+                var pledger: ByteArray,
+
+                @Column
+                @Lob
+                var manager: ByteArray,
+
+                @Column
+                var campaign_reference: String,
+
+                @Column
+                var linear_id: String
+        ) : PersistentState() {
+            constructor(pledge: Pledge): this(
+                    pledge.amount.token.toString(),
+                    pledge.amount.quantity,
+                    pledge.pledger.owningKey.encoded,
+                    pledge.manager.owningKey.encoded,
+                    pledge.campaignReference.id.toString(),
+                    pledge.linearId.id.toString()
+            )
+
+            constructor(): this("", 0, ByteArray(0), ByteArray(0), "", "")
         }
     }
 }

@@ -16,8 +16,8 @@ import java.time.Instant
 // TODO: Write more tests.
 class PledgeTests {
     private val ledgerServices = MockServices(listOf("net.corda.testing.contracts", "net.corda.demos.crowdFunding", "net.corda.finance"))
-    private val A = TestIdentity(CordaX500Name("A", "", "GB"))
-    private val B = TestIdentity(CordaX500Name("B", "", "GB"))
+    private val A = TestIdentity(CordaX500Name("Alice", "", "GB"))
+    private val B = TestIdentity(CordaX500Name("Bob", "", "GB"))
 
     private fun partyKeys(vararg identities: TestIdentity) = identities.map { it.party.owningKey }
     private val oneHourFromNow = Instant.now() + 1.hours
