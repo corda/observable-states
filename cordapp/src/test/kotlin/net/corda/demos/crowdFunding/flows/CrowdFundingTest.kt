@@ -11,7 +11,6 @@ import net.corda.core.utilities.loggerFor
 import net.corda.finance.flows.CashIssueFlow
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.StartedMockNode
-import net.corda.testing.node.startFlow
 import org.junit.After
 import org.junit.Before
 import org.slf4j.Logger
@@ -56,7 +55,7 @@ abstract class CrowdFundingTest {
     }
 
     fun <T : Any> StartedMockNode.start(logic: FlowLogic<T>): CordaFuture<T> {
-        return this.services.startFlow(logic)
+        return this.startFlow(logic)
     }
 
     fun StartedMockNode.legalIdentity(): Party {
@@ -70,7 +69,7 @@ abstract class CrowdFundingTest {
         val issueRef = OpaqueBytes.of(0)
         val issueRequest = CashIssueFlow.IssueRequest(amount, issueRef, notary)
         val flow = CashIssueFlow(issueRequest)
-        return party.services.startFlow(flow).getOrThrow().stx
+        return party.startFlow(flow).getOrThrow().stx
     }
 
 }

@@ -46,11 +46,11 @@ class MakePledgeTests : CrowdFundingTest() {
         val newPledgeStateRef = acceptPledgeTransaction.tx.outRefsOfType<Pledge>().single().ref
         val newPledge = acceptPledgeTransaction.tx.outputsOfType<Pledge>().single()
 
-        val aCampaignAfterPledge = A.services.database.transaction { A.services.loadState(campaignStateRefAfterPledge).data }
-        val bCampaignAfterPledge = B.services.database.transaction { B.services.loadState(campaignStateRefAfterPledge).data }
-        val cCampaignAfterPledge = C.services.database.transaction { C.services.loadState(campaignStateRefAfterPledge).data }
-        val dCampaignAfterPledge = D.services.database.transaction { D.services.loadState(campaignStateRefAfterPledge).data }
-        val eCampaignAfterPledge = E.services.database.transaction { E.services.loadState(campaignStateRefAfterPledge).data }
+        val aCampaignAfterPledge = A.transaction { A.services.loadState(campaignStateRefAfterPledge).data }
+        val bCampaignAfterPledge = B.transaction { B.services.loadState(campaignStateRefAfterPledge).data }
+        val cCampaignAfterPledge = C.transaction { C.services.loadState(campaignStateRefAfterPledge).data }
+        val dCampaignAfterPledge = D.transaction { D.services.loadState(campaignStateRefAfterPledge).data }
+        val eCampaignAfterPledge = E.transaction { E.services.loadState(campaignStateRefAfterPledge).data }
 
         // All parties should have the same updated Campaign state.
         assertEquals(1,
@@ -64,11 +64,11 @@ class MakePledgeTests : CrowdFundingTest() {
                 ).size
         )
 
-        val aNewPledge = A.services.database.transaction { A.services.loadState(newPledgeStateRef).data } as Pledge
-        val bNewPledge = B.services.database.transaction { B.services.loadState(newPledgeStateRef).data } as Pledge
-        val cNewPledge = C.services.database.transaction { C.services.loadState(newPledgeStateRef).data } as Pledge
-        val dNewPledge = D.services.database.transaction { D.services.loadState(newPledgeStateRef).data } as Pledge
-        val eNewPledge = E.services.database.transaction { E.services.loadState(newPledgeStateRef).data } as Pledge
+        val aNewPledge = A.transaction { A.services.loadState(newPledgeStateRef).data } as Pledge
+        val bNewPledge = B.transaction { B.services.loadState(newPledgeStateRef).data } as Pledge
+        val cNewPledge = C.transaction { C.services.loadState(newPledgeStateRef).data } as Pledge
+        val dNewPledge = D.transaction { D.services.loadState(newPledgeStateRef).data } as Pledge
+        val eNewPledge = E.transaction { E.services.loadState(newPledgeStateRef).data } as Pledge
 
         // All parties should have the same Pledge state.
         assertEquals(1,
@@ -128,20 +128,20 @@ class MakePledgeTests : CrowdFundingTest() {
         val newPledgeStateRef = acceptPledgeTransaction.tx.outRefsOfType<Pledge>().single().ref
         val newPledge = acceptPledgeTransaction.tx.outputsOfType<Pledge>().single()
 
-        val aCampaignAfterPledge = A.services.database.transaction { A.services.loadState(campaignStateRefAfterPledge).data }
-        val bCampaignAfterPledge = B.services.database.transaction { B.services.loadState(campaignStateRefAfterPledge).data }
-        assertFailsWith(TransactionResolutionException::class) { C.services.database.transaction { C.services.loadState(campaignStateRefAfterPledge) } }
-        assertFailsWith(TransactionResolutionException::class) { D.services.database.transaction { D.services.loadState(campaignStateRefAfterPledge) } }
-        assertFailsWith(TransactionResolutionException::class) { E.services.database.transaction { E.services.loadState(campaignStateRefAfterPledge) } }
+        val aCampaignAfterPledge = A.transaction { A.services.loadState(campaignStateRefAfterPledge).data }
+        val bCampaignAfterPledge = B.transaction { B.services.loadState(campaignStateRefAfterPledge).data }
+        assertFailsWith(TransactionResolutionException::class) { C.transaction { C.services.loadState(campaignStateRefAfterPledge) } }
+        assertFailsWith(TransactionResolutionException::class) { D.transaction { D.services.loadState(campaignStateRefAfterPledge) } }
+        assertFailsWith(TransactionResolutionException::class) { E.transaction { E.services.loadState(campaignStateRefAfterPledge) } }
 
         // Only PartyA and PartyB should have the updated campaign state.
         assertEquals(1, setOf(campaignAfterPledge, aCampaignAfterPledge, bCampaignAfterPledge).size)
 
-        val aNewPledge = A.services.database.transaction { A.services.loadState(newPledgeStateRef).data } as Pledge
-        val bNewPledge = B.services.database.transaction { B.services.loadState(newPledgeStateRef).data } as Pledge
-        assertFailsWith(TransactionResolutionException::class) { C.services.database.transaction { C.services.loadState(newPledgeStateRef) } }
-        assertFailsWith(TransactionResolutionException::class) { D.services.database.transaction { D.services.loadState(newPledgeStateRef) } }
-        assertFailsWith(TransactionResolutionException::class) { E.services.database.transaction { E.services.loadState(newPledgeStateRef) } }
+        val aNewPledge = A.transaction { A.services.loadState(newPledgeStateRef).data } as Pledge
+        val bNewPledge = B.transaction { B.services.loadState(newPledgeStateRef).data } as Pledge
+        assertFailsWith(TransactionResolutionException::class) { C.transaction { C.services.loadState(newPledgeStateRef) } }
+        assertFailsWith(TransactionResolutionException::class) { D.transaction { D.services.loadState(newPledgeStateRef) } }
+        assertFailsWith(TransactionResolutionException::class) { E.transaction { E.services.loadState(newPledgeStateRef) } }
 
         // Only PartyA and PartyB should have the updated campaign state.
         assertEquals(1, setOf(newPledge, aNewPledge, bNewPledge).size)
@@ -149,9 +149,9 @@ class MakePledgeTests : CrowdFundingTest() {
         // Only A and B should know the identity of the pledger (who is B in this case). Of course, the others won't know.
         assertEquals(B.legalIdentity(), A.services.identityService.wellKnownPartyFromAnonymous(newPledge.pledger))
         assertEquals(B.legalIdentity(), B.services.identityService.wellKnownPartyFromAnonymous(newPledge.pledger))
-        assertEquals(null, C.services.database.transaction { C.services.identityService.wellKnownPartyFromAnonymous(newPledge.pledger) })
-        assertEquals(null, D.services.database.transaction { D.services.identityService.wellKnownPartyFromAnonymous(newPledge.pledger) })
-        assertEquals(null, E.services.database.transaction { E.services.identityService.wellKnownPartyFromAnonymous(newPledge.pledger) })
+        assertEquals(null, C.transaction { C.services.identityService.wellKnownPartyFromAnonymous(newPledge.pledger) })
+        assertEquals(null, D.transaction { D.services.identityService.wellKnownPartyFromAnonymous(newPledge.pledger) })
+        assertEquals(null, E.transaction { E.services.identityService.wellKnownPartyFromAnonymous(newPledge.pledger) })
 
         network.waitQuiescent()
     }

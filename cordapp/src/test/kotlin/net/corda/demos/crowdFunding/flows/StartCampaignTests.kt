@@ -3,8 +3,6 @@ package net.corda.demos.crowdFunding.flows
 import net.corda.core.utilities.getOrThrow
 import net.corda.demos.crowdFunding.structures.Campaign
 import net.corda.finance.POUNDS
-import net.corda.testing.node.StartedMockNode
-import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -28,11 +26,11 @@ class StartCampaignTests : CrowdFundingTest() {
         val campaignState = campaign.tx.outputs.single()
 
         // Get the Campaign state from the observer node vaults.
-        val aCampaign = A.services.database.transaction { A.services.loadState(campaignStateRef) }
-        val bCampaign = B.services.database.transaction { B.services.loadState(campaignStateRef) }
-        val cCampaign = C.services.database.transaction { C.services.loadState(campaignStateRef) }
-        val dCampaign = D.services.database.transaction { D.services.loadState(campaignStateRef) }
-        val eCampaign = E.services.database.transaction { E.services.loadState(campaignStateRef) }
+        val aCampaign = A.transaction { A.services.loadState(campaignStateRef) }
+        val bCampaign = B.transaction { B.services.loadState(campaignStateRef) }
+        val cCampaign = C.transaction { C.services.loadState(campaignStateRef) }
+        val dCampaign = D.transaction { D.services.loadState(campaignStateRef) }
+        val eCampaign = E.transaction { E.services.loadState(campaignStateRef) }
 
         // All the states should be equal.
         assertEquals(1, setOf(campaignState, aCampaign, bCampaign, cCampaign, dCampaign, eCampaign).size)
