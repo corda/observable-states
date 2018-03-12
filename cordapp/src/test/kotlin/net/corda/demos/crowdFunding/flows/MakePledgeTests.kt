@@ -22,7 +22,7 @@ class MakePledgeTests : CrowdFundingTest() {
 
         // Start a new campaign.
         val startCampaignFlow = StartCampaign(rogersCampaign)
-        val createCampaignTransaction = A.start(startCampaignFlow).getOrThrow()
+        val createCampaignTransaction = A.startFlow(startCampaignFlow).getOrThrow()
 
         // Extract the state from the transaction.
         val campaignState = createCampaignTransaction.tx.outputs.single().data as Campaign
@@ -30,7 +30,7 @@ class MakePledgeTests : CrowdFundingTest() {
 
         // Make a pledge from PartyB to PartyA for £100.
         val makePledgeFlow = MakePledge.Initiator(100.POUNDS, campaignId, broadcastToObservers = true)
-        val acceptPledgeTransaction = B.start(makePledgeFlow).getOrThrow()
+        val acceptPledgeTransaction = B.startFlow(makePledgeFlow).getOrThrow()
 
         logger.info("New campaign started")
         logger.info(createCampaignTransaction.toString())
@@ -104,7 +104,7 @@ class MakePledgeTests : CrowdFundingTest() {
 
         // Start a new campaign.
         val startCampaignFlow = StartCampaign(rogersCampaign)
-        val createCampaignTransaction = A.start(startCampaignFlow).getOrThrow()
+        val createCampaignTransaction = A.startFlow(startCampaignFlow).getOrThrow()
 
         // Extract the state from the transaction.
         val campaignState = createCampaignTransaction.tx.outputs.single().data as Campaign
@@ -112,7 +112,7 @@ class MakePledgeTests : CrowdFundingTest() {
 
         // Make a pledge from PartyB to PartyA for £100 but don't broadcast it to everyone else.
         val makePledgeFlow = MakePledge.Initiator(100.POUNDS, campaignId, broadcastToObservers = false)
-        val acceptPledgeTransaction = B.start(makePledgeFlow).getOrThrow()
+        val acceptPledgeTransaction = B.startFlow(makePledgeFlow).getOrThrow()
 
         logger.info("New campaign started")
         logger.info(createCampaignTransaction.toString())

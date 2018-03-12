@@ -39,13 +39,13 @@ class EndCampaignTests : CrowdFundingTest() {
     fun `start campaign, make a pledge, don't raise enough, then end the campaign with a failure`() {
         // Start a campaign on PartyA.
         val startCampaignFlow = StartCampaign(rogersCampaign)
-        val newCampaign = A.start(startCampaignFlow).getOrThrow()
+        val newCampaign = A.startFlow(startCampaignFlow).getOrThrow()
         val newCampaignState = newCampaign.tx.outputs.single().data as Campaign
         val newCampaignId = newCampaignState.linearId
 
         // B makes a pledge to A's campaign.
         val makePledgeFlow = MakePledge.Initiator(100.POUNDS, newCampaignId, broadcastToObservers = true)
-        val campaignAfterFirstPledge = B.start(makePledgeFlow).getOrThrow()
+        val campaignAfterFirstPledge = B.startFlow(makePledgeFlow).getOrThrow()
         val campaignStateAfterFirstPledge = campaignAfterFirstPledge.tx.outputsOfType<Campaign>().single()
 
         // Wait for the campaign to end...
@@ -61,11 +61,11 @@ class EndCampaignTests : CrowdFundingTest() {
     @Test
     fun `start campaign, make a pledge, raise enough, then end the campaign with a success`() {
         // Issue cash to begin with.
-        val bCash = selfIssueCash(B, 500.POUNDS)
-        val cCash = selfIssueCash(C, 500.POUNDS)
+        selfIssueCash(B, 500.POUNDS)
+        selfIssueCash(C, 500.POUNDS)
         // Start a campaign on PartyA.
         val startCampaignFlow = StartCampaign(rogersCampaign)
-        val newCampaign = A.start(startCampaignFlow).getOrThrow()
+        val newCampaign = A.startFlow(startCampaignFlow).getOrThrow()
         val newCampaignState = newCampaign.tx.outputs.single().data as Campaign
         val newCampaignStateRef = newCampaign.tx.outRef<Campaign>(0).ref
         val newCampaignId = newCampaignState.linearId
@@ -76,7 +76,7 @@ class EndCampaignTests : CrowdFundingTest() {
 
         // B makes a pledge to A's campaign.
         val bMakePledgeFlow = MakePledge.Initiator(500.POUNDS, newCampaignId, broadcastToObservers = true)
-        val campaignAfterFirstPledge = B.start(bMakePledgeFlow).getOrThrow()
+        val campaignAfterFirstPledge = B.startFlow(bMakePledgeFlow).getOrThrow()
         val campaignStateAfterFirstPledge = campaignAfterFirstPledge.tx.outputsOfType<Campaign>().single()
         val campaignStateRefAfterFirstPledge = campaignAfterFirstPledge.tx.outRefsOfType<Campaign>().single().ref
         val firstPledge = campaignAfterFirstPledge.tx.outputsOfType<Pledge>().single()
@@ -90,7 +90,7 @@ class EndCampaignTests : CrowdFundingTest() {
 
         // C makes a pledge to A's campaign.
         val cMakePledgeFlow = MakePledge.Initiator(500.POUNDS, newCampaignId, broadcastToObservers = true)
-        val campaignAfterSecondPledge = C.start(cMakePledgeFlow).getOrThrow()
+        val campaignAfterSecondPledge = C.startFlow(cMakePledgeFlow).getOrThrow()
         val campaignStateAfterSecondPledge = campaignAfterSecondPledge.tx.outputsOfType<Campaign>().single()
         val campaignStateRefAfterSecondPledge = campaignAfterSecondPledge.tx.outRefsOfType<Campaign>().single().ref
         val secondPledge = campaignAfterSecondPledge.tx.outputsOfType<Pledge>().single()

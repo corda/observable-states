@@ -1,8 +1,6 @@
 package net.corda.demos.crowdFunding.flows
 
-import net.corda.core.concurrent.CordaFuture
 import net.corda.core.contracts.Amount
-import net.corda.core.flows.FlowLogic
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.OpaqueBytes
@@ -54,12 +52,8 @@ abstract class CrowdFundingTest {
         node.registerInitiatedFlow(EndCampaign.Responder::class.java)
     }
 
-    fun <T : Any> StartedMockNode.start(logic: FlowLogic<T>): CordaFuture<T> {
-        return this.startFlow(logic)
-    }
-
     fun StartedMockNode.legalIdentity(): Party {
-        return this.services.myInfo.legalIdentities.first()
+        return this.info.legalIdentities.first()
     }
 
     protected fun selfIssueCash(party: StartedMockNode,

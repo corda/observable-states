@@ -19,7 +19,7 @@ class StartCampaignTests : CrowdFundingTest() {
     fun `successfully start and broadcast campaign to all nodes`() {
         // Start a new Campaign.
         val flow = StartCampaign(rogersCampaign)
-        val campaign = A.start(flow).getOrThrow()
+        val campaign = A.startFlow(flow).getOrThrow()
 
         // Extract the state from the transaction.
         val campaignStateRef = campaign.tx.outRef<Campaign>(0).ref
