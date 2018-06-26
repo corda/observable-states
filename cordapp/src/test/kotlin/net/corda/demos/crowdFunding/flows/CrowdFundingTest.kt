@@ -17,21 +17,21 @@ import java.util.*
 
 abstract class CrowdFundingTest {
     protected lateinit var network: MockNetwork
-    protected lateinit var A: StartedMockNode
-    protected lateinit var B: StartedMockNode
-    protected lateinit var C: StartedMockNode
-    protected lateinit var D: StartedMockNode
-    protected lateinit var E: StartedMockNode
+    protected lateinit var a: StartedMockNode
+    protected lateinit var b: StartedMockNode
+    protected lateinit var c: StartedMockNode
+    protected lateinit var d: StartedMockNode
+    protected lateinit var e: StartedMockNode
 
     @Before
     fun setupNetwork() {
         network = MockNetwork(listOf("net.corda.demos.crowdFunding", "net.corda.finance"), threadPerNode = true)
-        A = network.createPartyNode()
-        B = network.createPartyNode()
-        C = network.createPartyNode()
-        D = network.createPartyNode()
-        E = network.createPartyNode()
-        listOf(A, B, C, D, E).forEach { node -> registerFlowsAndServices(node) }
+        a = network.createPartyNode()
+        b = network.createPartyNode()
+        c = network.createPartyNode()
+        d = network.createPartyNode()
+        e = network.createPartyNode()
+        listOf(a, b, c, d, e).forEach { node -> registerFlowsAndServices(node) }
     }
 
     @After

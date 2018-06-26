@@ -11,7 +11,7 @@ class StartCampaignTests : CrowdFundingTest() {
         get() = Campaign(
             name = "Roger's Campaign",
             target = 1000.POUNDS,
-            manager = A.legalIdentity(),
+            manager = a.legalIdentity(),
             deadline = fiveSecondsFromNow
     )
 
@@ -19,18 +19,18 @@ class StartCampaignTests : CrowdFundingTest() {
     fun `successfully start and broadcast campaign to all nodes`() {
         // Start a new Campaign.
         val flow = StartCampaign(rogersCampaign)
-        val campaign = A.startFlow(flow).getOrThrow()
+        val campaign = a.startFlow(flow).getOrThrow()
 
         // Extract the state from the transaction.
         val campaignStateRef = campaign.tx.outRef<Campaign>(0).ref
         val campaignState = campaign.tx.outputs.single()
 
         // Get the Campaign state from the observer node vaults.
-        val aCampaign = A.transaction { A.services.loadState(campaignStateRef) }
-        val bCampaign = B.transaction { B.services.loadState(campaignStateRef) }
-        val cCampaign = C.transaction { C.services.loadState(campaignStateRef) }
-        val dCampaign = D.transaction { D.services.loadState(campaignStateRef) }
-        val eCampaign = E.transaction { E.services.loadState(campaignStateRef) }
+        val aCampaign = a.transaction { a.services.loadState(campaignStateRef) }
+        val bCampaign = b.transaction { b.services.loadState(campaignStateRef) }
+        val cCampaign = c.transaction { c.services.loadState(campaignStateRef) }
+        val dCampaign = d.transaction { d.services.loadState(campaignStateRef) }
+        val eCampaign = e.transaction { e.services.loadState(campaignStateRef) }
 
         // All the states should be equal.
         assertEquals(1, setOf(campaignState, aCampaign, bCampaign, cCampaign, dCampaign, eCampaign).size)
